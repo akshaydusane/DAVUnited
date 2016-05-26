@@ -1,0 +1,16 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".fragments.NewsFragment"
+    android:id="@+id/news_frag"
+    android:background="#ffffff">
+
+    <!-- TODO: Update blank fragment layout -->
+    <TextView
+        android:id="@+id/tv_news_brief_title"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="Brief News Title" />
+
+</FrameLayout>
