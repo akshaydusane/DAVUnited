@@ -12,7 +12,7 @@ import com.davunited.R;
 public class SplashScreenActivity extends AppCompatActivity {
 
     private static final String TAG="DAVUnited";
-    private static int SPLASH_TIMEOUT = 2000;
+    private static int SPLASH_TIMEOUT = 500;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -13,6 +13,9 @@ public interface Keys {
         public static final String KEY_INS_NAME = "name";
         public static final String KEY_INS_STATE = "state_name";
         public static final String KEY_INS_WEBSITE = "website";
+        public static final String KEY_ZONE_ID = "zone_id";
+        public static final String KEY_ZONE_NAME = "zone_name";
+
 
 
     }

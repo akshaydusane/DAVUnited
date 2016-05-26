@@ -8,6 +8,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
@@ -36,11 +39,14 @@ import org.json.JSONObject;
 
 import com.davunited.extras.Keys.NewsKeys;
 
+
+
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-public class AboutFragment extends Fragment implements OnMapReadyCallback, NewsKeys{
+public class AboutFragment extends Fragment implements OnMapReadyCallback, NewsKeys {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -56,6 +62,12 @@ public class AboutFragment extends Fragment implements OnMapReadyCallback, NewsK
     private GoogleMap mMap;
     private static final String TAG = "DAV:AboutFragment";
     private ArrayList<InstituteFeeds> instituteArrayList = new ArrayList<>();
+    private List<String> sub_item_list = new ArrayList<String>();
+
+    ArrayAdapter<String> sub_item_data_adapter;
+
+    private Spinner sp_criteria;
+    private Spinner sp_sub_criteria;
 
     public AboutFragment() {
         // Required empty public constructor
@@ -81,7 +93,7 @@ public class AboutFragment extends Fragment implements OnMapReadyCallback, NewsK
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        Log.d(TAG,"onCreate");
+        //Log.d(TAG, "onCreate");
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
@@ -89,12 +101,13 @@ public class AboutFragment extends Fragment implements OnMapReadyCallback, NewsK
         }
 
 
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        Log.d(TAG,"onCreateView");
+        //Log.d(TAG,"onCreateView");
         // Inflate the layout for this fragment
         View view =  inflater.inflate(R.layout.fragment_about, container, false);
         //Toast.makeText(getActivity(), "About Clicked", Toast.LENGTH_SHORT).show();
@@ -102,53 +115,56 @@ public class AboutFragment extends Fragment implements OnMapReadyCallback, NewsK
         volleySingleton = VolleySingleton.getmInstance();
         requestQueue = volleySingleton.getmRequestQueue();
 
-        JSONObject params = new JSONObject();
-        try {
-            params.put("action","getLocation");
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        Log.d(TAG, params.toString());
-
-        /*----------------Getting data from url---------
-
-        //RequestQueue requestQueue = VolleySingleton.getmInstance().getmRequestQueue();
-        String url = "http://192.168.1.113/xampp/davunited/api/geteventapi.php";
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
+        sp_criteria = (Spinner)view.findViewById(R.id.sp_criteria);
+        sp_criteria.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
-            public void onResponse(String response) {
-                Log.d(TAG, response.toString());
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.e(TAG,error.toString());
-            }
-        }){
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                Map<String,String> params = new HashMap<String, String>();
-                params.put("user","akshay");
-                return params;
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                //Log.d(TAG, ""+position);
+                String cri_param = null;
+                switch (position){
+                    case 0:
+                        cri_param = "getZones";break;
+                    case 1:
+                        cri_param = "getStates";break;
+                }
+                sendCriteriaRequest(cri_param);
             }
 
             @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
-                Map<String,String> params = new HashMap<String, String>();
-                params.put("Content-Type","application/x-www-form-urlencoded");
-                return params;
+            public void onNothingSelected(AdapterView<?> parent) {
+
             }
-        };
-        requestQueue.add(stringRequest);*/
+        });
 
+        sp_sub_criteria = (Spinner)view.findViewById(R.id.sp_sub_criteria);
+        sp_sub_criteria.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                //Log.d(TAG, ""+parent.getItemAtPosition(position));
+                sendSubCriteriaRequest("searchByZone",position);
+                //StringWithTag item = (StringWithTag)parent.getItemAtPosition(position);
 
+            }
 
-        JsonArrayRequest request = new JsonArrayRequest(Request.Method.POST, getRequestUrl(),"",
-                new Response.Listener<JSONArray>() {
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        /*StringRequest request = new StringRequest(Request.Method.POST, getRequestUrl(),
+                new Response.Listener<String>() {
                     @Override
-                    public void onResponse(JSONArray response) {
-                        Log.d(TAG,response.toString());
-                        instituteArrayList = parseJsonData(response);
+                    public void onResponse(String response) {
+                        //Log.d(TAG,response.toString());
+                        JSONArray jsonresponse = null;
+                        try {
+                            jsonresponse = new JSONArray(response);
+                        }catch (JSONException ex){
+                            Log.e(TAG, ex.getMessage());
+                        }
+                        //Log.d(TAG,jsonresponse.toString());
+                        instituteArrayList = parseJsonData(jsonresponse);
 
                         for(int i = 0; i<instituteArrayList.size();i++){
                             Log.d(TAG, instituteArrayList.get(i).getLat() + " "+instituteArrayList.get(i).getLog());
@@ -166,13 +182,120 @@ public class AboutFragment extends Fragment implements OnMapReadyCallback, NewsK
                 public void onErrorResponse(VolleyError error) {
 
                 }
-            });
+            }) {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> params = new HashMap<String,String>();
+                params.put("action","getLocation");
+                Log.d(TAG, params.toString());
+                return params;
+            }
+        };
 
         //Log.d(TAG,request.toString());
-        requestQueue.add(request);
+        requestQueue.add(request);*/
+
+
 
         return view;
     }
+
+    public void sendCriteriaRequest(final String cri_param){
+        StringRequest request = new StringRequest(Request.Method.POST, getRequestUrl(), new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                Log.d(TAG,response.toString());
+                try {
+                    JSONArray jsonresponse = new JSONArray(response);
+                    sub_item_list = parseCriteriaData(jsonresponse);
+
+                    sub_item_data_adapter = new ArrayAdapter<>(getActivity(),android.R.layout.simple_spinner_item,sub_item_list);
+                    sp_sub_criteria.setAdapter(sub_item_data_adapter);
+
+                    //Log.d(TAG,sub_item_list.toString());
+                }catch(JSONException ex){
+                    Log.e(TAG, ex.getMessage());
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+            }
+        }){
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> params = new HashMap<String,String>();
+                params.put("action", cri_param);
+
+                return params;
+            }
+        };
+        requestQueue.add(request);
+
+    }
+
+    public List<String> parseCriteriaData(JSONArray response){
+        //List<Integer> sub_item_id = new ArrayList<Integer>();
+        List<String> sub_item_list = new ArrayList<String>();
+        try {
+            for (int i = 0; i < response.length(); i++) {
+                JSONObject currentItem = response.getJSONObject(i);
+                Integer itemId = currentItem.getInt(KEY_ZONE_ID);
+                String itemName = currentItem.getString(KEY_ZONE_NAME);
+
+                //sub_item_id.add(itemId);
+                sub_item_list.add(itemName);
+            }
+        }catch(JSONException ex){
+            Log.e(TAG, ex.getMessage());
+        }
+        return sub_item_list;
+    }
+
+
+    public void sendSubCriteriaRequest(final String action,final int data){
+        StringRequest request = new StringRequest(Request.Method.POST, getRequestUrl(), new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                //Log.d(TAG,response.toString());
+                try {
+                    JSONArray jsonresponse = new JSONArray(response);
+                    instituteArrayList = parseJsonData(jsonresponse);
+                    Log.d(TAG,instituteArrayList.toString());
+                }catch(JSONException ex){
+                    Log.e(TAG, ex.getMessage());
+                }
+
+
+                for(int i = 0; i<instituteArrayList.size();i++){
+                    Log.d(TAG, instituteArrayList.get(i).getLat() + " "+instituteArrayList.get(i).getLog());
+                    placeMarkers(
+                            new LatLng(instituteArrayList.get(i).getLat(), instituteArrayList.get(i).getLog()),
+                            instituteArrayList.get(i).getIns_name(),
+                            instituteArrayList.get(i).getIns_state(),
+                            instituteArrayList.get(i).getIns_website()
+                    );
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+            }
+        }){
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> params = new HashMap<String,String>();
+                params.put("action", action);
+                params.put("data",""+data);
+
+                return params;
+            }
+        };
+        requestQueue.add(request);
+    }
+
 
     public String getRequestUrl(){
         return UrlEndPoints.URL_INSTITUTES;
@@ -183,6 +306,7 @@ public class AboutFragment extends Fragment implements OnMapReadyCallback, NewsK
 
         ArrayList<InstituteFeeds> instituteArrayList = new ArrayList<>();
         if(response!=null && response.length()>0){
+            Log.d(TAG,"true");
             try{
                 for(int i=0;i<response.length();i++){
                     JSONObject currentInstitute = response.getJSONObject(i);
@@ -200,7 +324,7 @@ public class AboutFragment extends Fragment implements OnMapReadyCallback, NewsK
                     instituteFeed.setLog(log);
 
                     instituteArrayList.add(instituteFeed);
-                    //Log.d(TAG, lat + " " + log);
+                    Log.d(TAG, lat + " " + log);
                 }
 
 
@@ -218,14 +342,14 @@ public class AboutFragment extends Fragment implements OnMapReadyCallback, NewsK
 
     @Override
     public void onAttach(Context context) {
-        Log.d(TAG,"onAttach");
+        //Log.d(TAG, "onAttach");
         super.onAttach(context);
 
     }
 
     @Override
     public void onDetach() {
-        Log.d(TAG,"onDetach");
+        //Log.d(TAG, "onDetach");
         super.onDetach();
 
     }
@@ -233,7 +357,7 @@ public class AboutFragment extends Fragment implements OnMapReadyCallback, NewsK
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
-        Log.d(TAG,"onViewCreated");
+        //Log.d(TAG,"onViewCreated");
         super.onViewCreated(view, savedInstanceState);
 
         SupportMapFragment mapFragment = (SupportMapFragment)getChildFragmentManager().findFragmentById(R.id.map);
@@ -241,7 +365,7 @@ public class AboutFragment extends Fragment implements OnMapReadyCallback, NewsK
     }
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        Log.d(TAG, "onMapReady");
+        //Log.d(TAG, "onMapReady");
         mMap = googleMap;
 
         //placeMarkers(new LatLng(19.0825223, 72.741116));
@@ -258,6 +382,32 @@ public class AboutFragment extends Fragment implements OnMapReadyCallback, NewsK
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng,4));
     }
 
+    public class StringWithTag{
+        public Object itemId;
+        public String itemName;
+
+        public StringWithTag(Object itemId,String itemName){
+            this.itemId = itemId;
+            this.itemName = itemName;
+        }
+
+        public void setItemId(Object itemId) {
+            this.itemId = itemId;
+        }
+
+        public Object getItemId() {
+            return itemId;
+        }
+
+        public void setItemName(String itemName) {
+            this.itemName = itemName;
+        }
+
+        public String getItemName() {
+            return itemName;
+        }
+    }
+
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
@@ -270,3 +420,10 @@ public class AboutFragment extends Fragment implements OnMapReadyCallback, NewsK
      */
 
 }
+/*JSONObject params = new JSONObject();
+        try {
+            params.put("year_of_est","1995");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        Log.d(TAG, params.toString());*/
