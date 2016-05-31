@@ -99,9 +99,7 @@ public class ParentScreenActivity extends AppCompatActivity
         if (id == R.id.nav_home) {
             fragment = new HomeFragment();
 
-        } else if (id == R.id.nav_news) {
-            //fragment = new NewsFragment();
-        }  else if (id == R.id.nav_events) {
+        } else if (id == R.id.nav_events) {
             fragment = new EventsFragment();
         } else if (id == R.id.nav_aboutus) {
             fragment = new AboutFragment();

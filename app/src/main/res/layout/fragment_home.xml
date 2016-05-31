@@ -25,7 +25,6 @@
         android:id="@+id/rv_news_feeds"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/text_news"
-        />
+        android:layout_below="@+id/text_news"/>
 
 </RelativeLayout>

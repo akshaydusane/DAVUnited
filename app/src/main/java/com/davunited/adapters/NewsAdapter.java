@@ -1,22 +1,19 @@
 package com.davunited.adapters;
 
 import android.app.Activity;
-import android.app.FragmentTransaction;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.davunited.R;
-import com.davunited.extras.NewsFeeds;
-import com.davunited.fragments.NewsFragment;
+import com.davunited.activities.NewsDetailActivity;
+import com.davunited.extras.NewsEventsFeeds;
 
 import java.util.ArrayList;
 
@@ -27,14 +24,17 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.ViewHolderMovi
 
     android.app.Fragment fragment = null;
     private static final String TAG = "DAVUnited";
+    private static final String BIND_TITLE = "news_title";
+    private static final String BIND_DESCRIPTION = "news_description";
+    private static final String BIND_DATE = "news_date";
     private LayoutInflater layoutInflater;
-    private ArrayList<NewsFeeds> listNews = new ArrayList<>();
+    private ArrayList<NewsEventsFeeds> listNews = new ArrayList<>();
 
     public NewsAdapter(Context context){
         layoutInflater = LayoutInflater.from(context);
     }
 
-    public void setListMovies(ArrayList<NewsFeeds> listNews) {
+    public void setListMovies(ArrayList<NewsEventsFeeds> listNews) {
         this.listNews = listNews;
         notifyItemChanged(0, listNews.size());
     }
@@ -48,12 +48,29 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.ViewHolderMovi
     }
 
     @Override
-    public void onBindViewHolder(ViewHolderMovieAdapter holder, int position) {
+    public void onBindViewHolder(final ViewHolderMovieAdapter holder, int position) {
         Log.d(TAG, "onBindViewHolder");
-        NewsFeeds currentNews = listNews.get(position);
+        NewsEventsFeeds currentNews = listNews.get(position);
+
+        holder.str_bind_title = currentNews.getTitle();
+        holder.str_bind_description = currentNews.getDescription();
+        holder.str_bind_date = currentNews.getDate();
+
         holder.tv_title.setText(currentNews.getTitle());
         holder.tv_description.setText(currentNews.getDescription());
         holder.tv_date.setText(currentNews.getDate());
+
+        holder.mView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Context context = v.getContext();
+                Intent intent = new Intent(context, NewsDetailActivity.class);
+                intent.putExtra(BIND_TITLE,holder.str_bind_title);
+                intent.putExtra(BIND_DESCRIPTION,holder.str_bind_description);
+                intent.putExtra(BIND_DATE,holder.str_bind_date);
+                context.startActivity(intent);
+            }
+        });
     }
 
     @Override
@@ -68,22 +85,31 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.ViewHolderMovi
 
     class ViewHolderMovieAdapter extends RecyclerView.ViewHolder{
 
+        private String str_bind_title;
+        private String str_bind_description;
+        private String str_bind_date;
+
         private TextView tv_title;
         private TextView tv_description;
         private TextView tv_date;
         private Activity activity;
+        private View mView;
 
         Bundle bundle;
 
         public ViewHolderMovieAdapter(View view){
             super(view);
+            mView = view;
             activity = (Activity)view.getContext();
 
             tv_title = (TextView)view.findViewById(R.id.tv_news_title);
             tv_description = (TextView)view.findViewById(R.id.tv_news_description);
             tv_date = (TextView)view.findViewById(R.id.tv_news_date);
 
-            view.setOnClickListener(new View.OnClickListener() {
+        }
+    }
+}
+/*view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     //Toast.makeText(v.getContext(),"Item:"+listNews.get(getAdapterPosition()),Toast.LENGTH_SHORT).show();
@@ -103,8 +129,4 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.ViewHolderMovi
                     //Toast.makeText(v.getContext(),""+fragmentManager ,Toast.LENGTH_SHORT).show();
 
                 }
-            });
-
-        }
-    }
-}
+            });*/

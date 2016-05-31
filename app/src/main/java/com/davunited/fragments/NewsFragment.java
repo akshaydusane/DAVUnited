@@ -13,12 +13,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.davunited.R;
-import com.davunited.extras.NewsFeeds;
 
-import org.w3c.dom.Text;
-
-import java.lang.reflect.Array;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

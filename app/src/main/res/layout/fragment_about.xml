@@ -17,23 +17,30 @@
         class="com.google.android.gms.maps.SupportMapFragment"/>
 
     <Spinner
-        android:layout_width="match_parent"
+        android:layout_width="150dp"
         android:layout_height="wrap_content"
         android:id="@+id/sp_criteria"
-        android:layout_gravity="center_horizontal|bottom"
+        android:layout_marginLeft="25dp"
+        android:layout_marginTop="30dp"
+        android:layout_gravity="left|bottom"
         android:layout_below="@+id/map"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:entries="@array/criteria"
-        />
+        android:spinnerMode="dropdown"/>
 
     <Spinner
-        android:layout_width="match_parent"
+        android:layout_width="150dp"
         android:layout_height="wrap_content"
         android:id="@+id/sp_sub_criteria"
-        android:layout_below="@+id/sp_criteria"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:spinnerMode="dialog"
+        android:layout_marginLeft="25dp"
+        android:layout_marginTop="30dp"
+        android:layout_alignBottom="@+id/sp_criteria"
+        android:layout_toRightOf="@+id/sp_criteria"
+        android:layout_toEndOf="@+id/sp_criteria"
+        android:layout_marginStart="33dp" />
+
 
 
 </RelativeLayout>

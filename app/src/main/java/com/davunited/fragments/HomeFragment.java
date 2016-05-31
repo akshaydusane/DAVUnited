@@ -10,22 +10,23 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.davunited.R;
 import com.davunited.adapters.NewsAdapter;
 import com.davunited.classes.VolleySingleton;
-import com.davunited.extras.NewsFeeds;
+import com.davunited.extras.NewsEventsFeeds;
 import com.davunited.extras.UrlEndPoints;
 
 import org.json.JSONArray;
@@ -35,12 +36,13 @@ import org.json.JSONObject;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
-import com.davunited.extras.Keys.NewsKeys;
+import com.davunited.extras.Keys;
 
 
-public class HomeFragment extends Fragment implements NewsKeys {
+public class HomeFragment extends Fragment implements Keys.JsonKeys {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -64,7 +66,7 @@ public class HomeFragment extends Fragment implements NewsKeys {
     RecyclerView rv_news_feeds;
 
     private NewsAdapter newsAdapter;
-    private ArrayList<NewsFeeds> listNews = new ArrayList<>();
+    private ArrayList<NewsEventsFeeds> listNews = new ArrayList<>();
     private static final String TAG = "DAV:HomeFragment";
 
     DateFormat formatDate = new SimpleDateFormat("yyyy-MM-dd");
@@ -121,13 +123,16 @@ public class HomeFragment extends Fragment implements NewsKeys {
         rv_news_feeds.setAdapter(newsAdapter);
 
 
-        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, getRequestUrl(), "", new Response.Listener<JSONArray>() {
+        StringRequest request = new StringRequest(Request.Method.POST, getRequestUrl(), new Response.Listener<String>() {
             @Override
-            public void onResponse(JSONArray response) {
+            public void onResponse(String response) {
+                Log.d(TAG, response);
                 //Toast.makeText(getActivity(), "JSONResponse:" + response, Toast.LENGTH_LONG).show();
+                JSONArray jsonresponse = null;
                 try {
-                    listNews = parseJsonData(response);
-                    Log.e(TAG, listNews.toString());
+                    jsonresponse = new JSONArray(response);
+                    listNews = parseJsonData(jsonresponse);
+                    Log.d(TAG, listNews.toString());
                     newsAdapter.setListMovies(listNews);
 
                 }catch (Exception e){
@@ -139,7 +144,15 @@ public class HomeFragment extends Fragment implements NewsKeys {
             public void onErrorResponse(VolleyError error) {
                 Toast.makeText(getActivity(), "JSONError:" + error, Toast.LENGTH_LONG).show();
             }
-        });
+        }){
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> params = new HashMap<String,String>();
+                params.put("action", "getNewsEvents");
+                params.put("data","0"); //0-News
+                return params;
+            }
+        };
 
         requestQueue.add(request);
 
@@ -153,10 +166,10 @@ public class HomeFragment extends Fragment implements NewsKeys {
     }
 
 
-    public ArrayList<NewsFeeds> parseJsonData(JSONArray response) throws JSONException {
+    public ArrayList<NewsEventsFeeds> parseJsonData(JSONArray response) throws JSONException {
         //tv_json.setText(""+response.length());
 
-        ArrayList<NewsFeeds> listNews = new ArrayList<>();
+        ArrayList<NewsEventsFeeds> listNews = new ArrayList<>();
         if (response != null && response.length() > 0) {
 
             try {
@@ -167,7 +180,7 @@ public class HomeFragment extends Fragment implements NewsKeys {
                     String dateString = currentNews.getString(KEY_DATE);
 
 
-                    NewsFeeds news = new NewsFeeds();
+                    NewsEventsFeeds news = new NewsEventsFeeds();
 
                     news.setTitle(title);
                     news.setDescription(desription);
@@ -204,7 +217,7 @@ public class HomeFragment extends Fragment implements NewsKeys {
     }
 
     public static String getRequestUrl(){
-        return UrlEndPoints.URL_NEWS;
+        return UrlEndPoints.URL_INSTITUTES;
     }
 
     class CorouselAdapter extends PagerAdapter{
